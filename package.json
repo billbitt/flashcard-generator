@@ -1,0 +1,22 @@
+{
+  "name": "flashcard-generator",
+  "version": "1.0.0",
+  "description": "UCLA Bootcamp - Homework 11",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/billbitt/flashcard-generator.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/billbitt/flashcard-generator/issues"
+  },
+  "homepage": "https://github.com/billbitt/flashcard-generator#readme",
+  "dependencies": {
+    "inquirer": "^2.0.0"
+  }
+}
