@@ -8,19 +8,23 @@ function BasicFlashcard(front, back){
     this.back = back;
     this.type = "basic";
     this.useCard = function(){
+        back = this.back;
         //show front
-        console.log(this.front);
+        console.log("");
+        console.log("Front: " + this.front);
         //ask if ready for answer
         inquirer.prompt([
             {
-                type: "confirm";
-                message: "Press enter to see answer",
+                type: "confirm",
+                message: "Directions: Press Y to see answer",
                 name: "confirm",
                 default: true
             }
         ]).then(function(response){
             //show answer
-            console.log(this.back);
+            console.log("Back: " + back);
+            //re-start the app's loop
+            startApp();
         })
     };
 };
@@ -36,19 +40,23 @@ function ClozeFlashard(text, cloze){
     };
     this.useCard = function(){
         //show cloze deleted text 
-        var clozeDeleted = this.returnCloseDeleted();
-        console.log(closeDeleted);
+        var clozeDeleted = this.returnClozeDeleted();
+        var answer = this.text;
+        console.log("");
+        console.log("cloze-deleted version: " + clozeDeleted);
         //ask if ready for answer
         inquirer.prompt([
             {
-                type: "confirm";
-                message: "Press enter to see answer",
+                type: "confirm",
+                message: "Directions: Press enter to see answer",
                 name: "confirm",
                 default: true
             }
         ]).then(function(response){
             //show answer
-            console.log(this.text);
+            console.log("Answer: " + answer);
+            //re-start the app's loop
+            startApp();
         })
     };
 }
@@ -60,18 +68,19 @@ function startApp(){
         {
             type: "list",
             message: "What would you like to do?",
-            choices: ["Create New Card", "Review Cards", "Load Cards", "Archive Cards"],
+            choices: ["Create New Card", "Review A Card", "Load Cards", "Save Cards"],
             name: "action"
         }
     ]).then(function(response){
        if (response.action === "Create New Card"){
            createCard(); //run the create New Card function
-       } else if (response.action === "Review Cards"){
-           reviewCards(); //run the review cards function
+       } else if (response.action === "Review A Card"){
+           console.log("lets review a card"); //testing
+           reviewCards(cards); //run the review cards function
        } else if (response.action === "Load Cards"){
            loadCards();
-       } else if (response.action === "Archive Current Cards"){
-           archiveCards();
+       } else if (response.action === "Save Cards"){
+           saveCards(cards);
        }
     });
 } //startApp()
@@ -86,10 +95,10 @@ function createCard(){
             name: "cardType"
         }
     ]).then(function(response){
-        if (response.action === "Basic card"){
+        if (response.cardType === "Basic card"){
            createBasic(); //run the create New Card function
        } else {
-           createClose(); //run the review cards function
+           createCloze(); //run the review cards function
        };
     });
 } //createCard()
@@ -111,6 +120,9 @@ function createBasic(){
         var newBasic = new BasicFlashcard(response.front, response.back);
         //store the card in the cards array
         cards.push(newBasic);
+        console.log(cards);
+        //re-start the app's loop
+        startApp();
     });
 }
 
@@ -118,55 +130,56 @@ function createCloze(){
     inquirer.prompt([
         {
             type: "input",
-            message: "Enter the full card, with the close in parentheses.  Such as: '<George Washington> was the first president of the United States.'",
-            name: "full"
+            message: "Enter the full card.  Such as: 'George Washington was the first president of the United States.'",
+            name: "text"
+        },
+        {
+            type: "input",
+            message: "Enter the text that should be clozed (e.g. 'George Washington')",
+            name: "cloze"
         }
     ]).then(function(response){
-        //create the new card
-        var fullCard = response.full;
-        var clozeCardStart = "";
-        var clozeCardMiddle = "";
-        var clozeCardEnd = "";
-        var status = "start";
-        for (var i = 0; i < fullCard.length; i++){
-            if (status === "start"){
-                if (fullCard[i] != "<"){
-                    clozeCardStart = clozeCardStart + fullCard[i];
-                } else {
-                    status = "middle";
-                };
-            } else if (status === "middle"){
-                if (fullCard[i] != ">"){
-                    clozeCardMiddle = clozeCardMiddle + fullCard[i];
-                } else {
-                    status = "end"
-                };
-            } else if (status === "end"){
-                clozeCardEnd = clozeCardEnd + fullCard[i];
-            };
+        console.log("hello"); // tester
+        var fullCard = response.text;
+        var cloze = response.cloze;
+        console.log(fullCard, cloze);
+        //check to make sure the cloze works
+        if (fullCard.indexOf(cloze) != -1){
+            console.log("you passed the test");
+            //store the card
+            var newCloze = new ClozeFlashard(fullCard, cloze);
+            //add the card to the array
+            cards.push(newCloze);
+            console.log(cards); //tester
+        } else {
+            console.log("That cloze is not inside the text of your card.  Start Again.")
         }
-        var fullText = clozeCardStart + closeCardMiddle + closeCardEnd;
-        var newCloze = new ClozeFlashard(fullText, clozeCardMiddle);
-        //add the card to the array
-        cards.push(newCloze);
+        //restart the app loop
+        startApp();
     });
 }
 
 //funtion to review all the cards in current card Object
-function reviewCards(){
+function reviewCards(cardsArray){
     //get all the cards from the cards array (if no cards, say so)
-
-    //review all the cards (recurrsion)
-
-
+    console.log("test");
+    var randomCard = Math.floor(Math.random() * cardsArray.length);
+    cardsArray[randomCard].useCard();
 } //reviewCards()
 
 //function to load all cards from cardLog.txt
 function loadCards(){
+    //get al the cards from the text file and save to the cards array
+    //clear cards array
+    cards = [];
 
 }
 
 //funciton to archive (save) all the cards to cardLog.txt 
-function archiveCards(){
-
+function saveCards(cardsArray){
+    //save all the objects in the cards array to the text file
 }
+
+
+//run the app
+startApp();
