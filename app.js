@@ -15,14 +15,17 @@ function BasicFlashcard(front, back){
         //ask if ready for answer
         inquirer.prompt([
             {
-                type: "confirm",
-                message: "Directions: Press Y to see answer",
-                name: "confirm",
-                default: true
+                type: "input",
+                message: "What is on the back?",
+                name: "input",
             }
         ]).then(function(response){
-            //show answer
-            console.log("Back: " + back);
+            //show the result
+            if (response.input === back) {
+                console.log("You are correct!");
+            } else {
+                console.log("Nope.  The back was: " + back);
+            }
             //re-start the app's loop
             startApp();
         })
@@ -42,19 +45,24 @@ function ClozeFlashard(text, cloze){
         //show cloze deleted text 
         var clozeDeleted = this.returnClozeDeleted();
         var answer = this.text;
+        var cloze = this.cloze;
         console.log("");
         console.log("cloze-deleted version: " + clozeDeleted);
         //ask if ready for answer
         inquirer.prompt([
             {
-                type: "confirm",
-                message: "Directions: Press enter to see answer",
-                name: "confirm",
-                default: true
+                type: "input",
+                message: "What is missing in the ' . . . ' ?",
+                name: "input",
             }
         ]).then(function(response){
-            //show answer
-            console.log("Answer: " + answer);
+            //show the result
+            if (response.input === answer){
+                console.log("You are correct!");
+            } else {
+                console.log("Nope. The answer was: " + cloze);
+            };
+            console.log("The whole phraze was: " + answer);
             //re-start the app's loop
             startApp();
         })
@@ -120,7 +128,6 @@ function createBasic(){
         var newBasic = new BasicFlashcard(response.front, response.back);
         //store the card in the cards array
         cards.push(newBasic);
-        console.log(cards);
         //re-start the app's loop
         startApp();
     });
@@ -145,12 +152,10 @@ function createCloze(){
         console.log(fullCard, cloze);
         //check to make sure the cloze works
         if (fullCard.indexOf(cloze) != -1){
-            console.log("you passed the test");
             //store the card
             var newCloze = new ClozeFlashard(fullCard, cloze);
             //add the card to the array
             cards.push(newCloze);
-            console.log(cards); //tester
         } else {
             console.log("That cloze is not inside the text of your card.  Start Again.")
         }
@@ -172,12 +177,28 @@ function loadCards(){
     //get al the cards from the text file and save to the cards array
     //clear cards array
     cards = [];
+    // load cards
 
 }
 
 //funciton to archive (save) all the cards to cardLog.txt 
 function saveCards(cardsArray){
     //save all the objects in the cards array to the text file
+    //clear the file then write all the current cards
+    fs.writeFile("cardLog.txt", "", function(error){
+        if (error){
+            console.log("An error occured while saving the cards");
+            return;
+        } else {
+            for (var i = 0; i < cardsArray.length; i++){
+                var saveString = "<<START>>" + JSON.stringify(cardsArray[i]) + "<<END>>";
+                fs.appendFile("cardLog.txt", saveString, function(error){
+                    if (error) console.log("An error occured while writing a card to the save file.");
+                })
+            };
+            console.log("The cards were successfully saved");
+        };
+    });
 }
 
 
